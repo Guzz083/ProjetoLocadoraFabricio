@@ -11,6 +11,7 @@ public class main {
     static ArrayList<Cliente> clientes = new ArrayList<>();
     static ArrayList<Funcionario> funcionarios = new ArrayList<>();
     static ArrayList<Veiculo> veiculos = new ArrayList<>();
+    static ArrayList<Aluguel> alugueis = new ArrayList<>();
 
     public static void main(String[] args) throws ParseException {
         while (true) {
@@ -18,9 +19,12 @@ public class main {
                     " Cadastrar Cliente",
                     " Cadastrar Funcionário",
                     " Cadastrar Veículo",
+                    " Alugar Veículo",
+                    " Encerrar Locação",
                     " Listar Clientes",
                     " Listar Funcionários",
                     " Listar Veículos",
+                    " Listar Locações",
                     "❌ Sair"
             };
 
@@ -35,7 +39,7 @@ public class main {
                     opcoesPainel[0]
             );
 
-            if (escolha == -1 || escolha == 6) {
+            if (escolha == -1 || escolha == 9) {
                 int confirmar = JOptionPane.showConfirmDialog(
                         null,
                         "Deseja realmente sair do sistema?",
@@ -54,9 +58,12 @@ public class main {
                 case 0 -> cadastrarCliente();
                 case 1 -> cadastrarFuncionario();
                 case 2 -> cadastrarVeiculo();
-                case 3 -> listarClientes();
-                case 4 -> listarFuncionarios();
-                case 5 -> listarVeiculos();
+                case 3 -> alugarVeiculo();
+                case 4 -> encerrarLocacao();
+                case 5 -> listarClientes();
+                case 6 -> listarFuncionarios();
+                case 7 -> listarVeiculos();
+                case 8 -> listarLocacoes();
             }
         }
     }
@@ -71,9 +78,6 @@ public class main {
 
         String endereco = JOptionPane.showInputDialog(null, "Endereço:", "Cadastrar Cliente", JOptionPane.PLAIN_MESSAGE);
         if (endereco == null || endereco.isBlank()) { avisoVazio(); return; }
-
-        String telefone = JOptionPane.showInputDialog(null, "Telefone:", "Cadastrar Cliente", JOptionPane.PLAIN_MESSAGE);
-        if (telefone == null || telefone.isBlank()) { avisoVazio(); return; }
 
         Cliente cliente = new Cliente(nome.trim(), cpf.trim(), endereco.trim());
         clientes.add(cliente);
@@ -92,7 +96,7 @@ public class main {
         if (cpf == null || cpf.isBlank()) { avisoVazio(); return; }
 
         String matricula = JOptionPane.showInputDialog(null, "Matrícula:", "Cadastrar Funcionário", JOptionPane.PLAIN_MESSAGE);
-        if (matricula == null || matricula.isBlank()) { avisoVazio(); return; }
+        if (matricula == null || matricula.isBlank()) { avisoVazio();        return; }
 
         String cargo = JOptionPane.showInputDialog(null, "Cargo:", "Cadastrar Funcionário", JOptionPane.PLAIN_MESSAGE);
         if (cargo == null || cargo.isBlank()) { avisoVazio(); return; }
@@ -180,6 +184,111 @@ public class main {
         JOptionPane.showMessageDialog(null,
                 " Veículo cadastrado com sucesso!\n\n" + veiculo,
                 "Cadastro Realizado", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    static void alugarVeiculo() {
+        // Filtra apenas veículos com status DISPONIVEL — alugados não aparecem aqui
+        ArrayList<Veiculo> disponiveis = new ArrayList<>();
+        for (Veiculo v : veiculos) {
+            if (v.getStatus() == Veiculo.Status.DISPONIVEL) disponiveis.add(v);
+        }
+
+        if (disponiveis.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhum veículo disponível para locação no momento.",
+                    "Alugar Veículo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (clientes.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado. Cadastre um cliente antes de alugar.",
+                    "Alugar Veículo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        if (funcionarios.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhum funcionário cadastrado. Cadastre um funcionário antes de alugar.",
+                    "Alugar Veículo", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        Veiculo veiculoEscolhido = (Veiculo) JOptionPane.showInputDialog(
+                null, "Selecione o veículo a ser alugado:", "Alugar Veículo",
+                JOptionPane.PLAIN_MESSAGE, null, disponiveis.toArray(), disponiveis.get(0));
+        if (veiculoEscolhido == null) { avisoVazio(); return; }
+
+        Cliente clienteEscolhido = (Cliente) JOptionPane.showInputDialog(
+                null, "Selecione o cliente:", "Alugar Veículo",
+                JOptionPane.PLAIN_MESSAGE, null, clientes.toArray(), clientes.get(0));
+        if (clienteEscolhido == null) { avisoVazio(); return; }
+
+        Funcionario funcionarioEscolhido = (Funcionario) JOptionPane.showInputDialog(
+                null, "Selecione o funcionário responsável pela locação:", "Alugar Veículo",
+                JOptionPane.PLAIN_MESSAGE, null, funcionarios.toArray(), funcionarios.get(0));
+        if (funcionarioEscolhido == null) { avisoVazio(); return; }
+
+        int dias = 0;
+        while (true) {
+            String diasStr = JOptionPane.showInputDialog(null, "Quantidade de dias de locação:",
+                    "Alugar Veículo", JOptionPane.PLAIN_MESSAGE);
+            if (diasStr == null) { avisoVazio(); return; }
+            try {
+                dias = Integer.parseInt(diasStr.trim());
+                if (dias <= 0) throw new NumberFormatException();
+                break;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, " Valor inválido. Digite um número inteiro maior que zero.",
+                        "Erro", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+
+        try {
+            Aluguel aluguel = new Aluguel(veiculoEscolhido, clienteEscolhido, funcionarioEscolhido, dias);
+            alugueis.add(aluguel);
+
+            JOptionPane.showMessageDialog(null,
+                    "✅ Locação realizada com sucesso!\n\n" + aluguel,
+                    "Locação Confirmada", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(null, "Não foi possível realizar a locação: " + e.getMessage(),
+                    "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    static void encerrarLocacao() {
+        // Apenas locações ainda ativas podem ser encerradas
+        ArrayList<Aluguel> ativas = new ArrayList<>();
+        for (Aluguel a : alugueis) {
+            if (a.isAtivo()) ativas.add(a);
+        }
+
+        if (ativas.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Não há locações ativas no momento.",
+                    "Encerrar Locação", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        Aluguel aluguelEscolhido = (Aluguel) JOptionPane.showInputDialog(
+                null, "Selecione a locação a ser encerrada:", "Encerrar Locação",
+                JOptionPane.PLAIN_MESSAGE, null, ativas.toArray(), ativas.get(0));
+        if (aluguelEscolhido == null) { avisoVazio(); return; }
+
+        aluguelEscolhido.encerrarLocacao();
+
+        JOptionPane.showMessageDialog(null,
+                "✅ Locação encerrada com sucesso! O veículo está disponível novamente.\n\n" + aluguelEscolhido,
+                "Locação Encerrada", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    static void listarLocacoes() {
+        if (alugueis.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Nenhuma locação registrada ainda.",
+                    "Lista de Locações", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        StringBuilder sb = new StringBuilder(" LOCAÇÕES REGISTRADAS (" + alugueis.size() + ")\n");
+        sb.append("─".repeat(60)).append("\n");
+        for (int i = 0; i < alugueis.size(); i++) {
+            sb.append((i + 1)).append(". ").append(alugueis.get(i)).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, sb.toString(), "Lista de Locações", JOptionPane.INFORMATION_MESSAGE);
     }
 
     static void listarClientes() {
