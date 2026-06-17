@@ -5,12 +5,11 @@ import javax.swing.JOptionPane;
 import java.text.ParseException;
 import java.util.ArrayList;
 
-public class main {
+public class    main {
 
-    // Listas de armazenamento
-    static ArrayList<Cliente> clientes = new ArrayList<>();
-    static ArrayList<Funcionario> funcionarios = new ArrayList<>();
-    static ArrayList<Veiculo> veiculos = new ArrayList<>();
+    static ClienteDAO clienteDao = new ClienteDAO();
+    static FuncionarioDAO funcionarioDao = new FuncionarioDAO();
+    static VeiculoDAO veiculoDao = new VeiculoDAO();
     static ArrayList<Aluguel> alugueis = new ArrayList<>();
 
     public static void main(String[] args) throws ParseException {
@@ -80,7 +79,9 @@ public class main {
         if (endereco == null || endereco.isBlank()) { avisoVazio(); return; }
 
         Cliente cliente = new Cliente(nome.trim(), cpf.trim(), endereco.trim());
-        clientes.add(cliente);
+        //clientes.add(cliente);
+
+        clienteDao.inserir(cliente);
 
         JOptionPane.showMessageDialog(null,
                 "✅ Cliente cadastrado com sucesso!\n\n" + cliente,
@@ -116,12 +117,17 @@ public class main {
         }
 
         Funcionario func = new Funcionario(nome.trim(), cpf.trim(), matricula.trim(), cargo.trim(), salario);
-        boolean add;
-        if (funcionarios.add(func)) add = true;
-        else add = false;
+        //boolean add;
+        //if (funcionarios.add(func)) add = true;
+        //else add = false;
 
+        //JOptionPane.showMessageDialog(null,
+        //        " Funcionário cadastrado com sucesso!\n\n" + func,
+        //        "Cadastro Realizado", JOptionPane.INFORMATION_MESSAGE);
+
+        funcionarioDao.inserir(func);
         JOptionPane.showMessageDialog(null,
-                " Funcionário cadastrado com sucesso!\n\n" + func,
+                "✅ Funcionário cadastrado com sucesso!\n\n" + func,
                 "Cadastro Realizado", JOptionPane.INFORMATION_MESSAGE);
     }
 
@@ -179,7 +185,10 @@ public class main {
 
         Veiculo.Tipo tipo = Veiculo.Tipo.values()[tipoEscolhido];
         Veiculo veiculo = new Veiculo(placa.trim().toUpperCase(), marca.trim(), modelo.trim(), ano, diaria, tipo);
-        veiculos.add(veiculo);
+        //veiculos.add(veiculo);
+        veiculoDao.inserir(veiculo);
+
+
 
         JOptionPane.showMessageDialog(null,
                 " Veículo cadastrado com sucesso!\n\n" + veiculo,
@@ -187,23 +196,22 @@ public class main {
     }
 
     static void alugarVeiculo() {
-        // Filtra apenas veículos com status DISPONIVEL — alugados não aparecem aqui
-        ArrayList<Veiculo> disponiveis = new ArrayList<>();
-        for (Veiculo v : veiculos) {
-            if (v.getStatus() == Veiculo.Status.DISPONIVEL) disponiveis.add(v);
-        }
+
+        ArrayList<Veiculo> disponiveis = veiculoDao.buscarDisponiveis();
+        ArrayList<Cliente> clientesBanco = clienteDao.buscarClientes();
+        ArrayList<Funcionario> funcionariosBanco = funcionarioDao.buscarFunc();
 
         if (disponiveis.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhum veículo disponível para locação no momento.",
                     "Alugar Veículo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (clientes.isEmpty()) {
+        if (clientesBanco.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado. Cadastre um cliente antes de alugar.",
                     "Alugar Veículo", JOptionPane.WARNING_MESSAGE);
             return;
         }
-        if (funcionarios.isEmpty()) {
+        if (funcionariosBanco.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhum funcionário cadastrado. Cadastre um funcionário antes de alugar.",
                     "Alugar Veículo", JOptionPane.WARNING_MESSAGE);
             return;
@@ -216,12 +224,12 @@ public class main {
 
         Cliente clienteEscolhido = (Cliente) JOptionPane.showInputDialog(
                 null, "Selecione o cliente:", "Alugar Veículo",
-                JOptionPane.PLAIN_MESSAGE, null, clientes.toArray(), clientes.get(0));
+                JOptionPane.PLAIN_MESSAGE, null, clientesBanco.toArray(), clientesBanco.get(0));
         if (clienteEscolhido == null) { avisoVazio(); return; }
 
         Funcionario funcionarioEscolhido = (Funcionario) JOptionPane.showInputDialog(
                 null, "Selecione o funcionário responsável pela locação:", "Alugar Veículo",
-                JOptionPane.PLAIN_MESSAGE, null, funcionarios.toArray(), funcionarios.get(0));
+                JOptionPane.PLAIN_MESSAGE, null, funcionariosBanco.toArray(), funcionariosBanco.get(0));
         if (funcionarioEscolhido == null) { avisoVazio(); return; }
 
         int dias = 0;
@@ -292,6 +300,9 @@ public class main {
     }
 
     static void listarClientes() {
+
+        ArrayList<Cliente> clientes = clienteDao.buscarClientes();
+
         if (clientes.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhum cliente cadastrado ainda.",
                     "Lista de Clientes", JOptionPane.INFORMATION_MESSAGE);
@@ -306,29 +317,35 @@ public class main {
     }
 
     static void listarFuncionarios() {
-        if (funcionarios.isEmpty()) {
+
+        ArrayList<Funcionario> funcionariosBanco = funcionarioDao.buscarFunc();
+
+        if (funcionariosBanco.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhum funcionário cadastrado ainda.",
                     "Lista de Funcionários", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        StringBuilder sb = new StringBuilder(" FUNCIONÁRIOS CADASTRADOS (" + funcionarios.size() + ")\n");
+        StringBuilder sb = new StringBuilder(" FUNCIONÁRIOS CADASTRADOS (" + funcionariosBanco.size() + ")\n");
         sb.append("─".repeat(60)).append("\n");
-        for (int i = 0; i < funcionarios.size(); i++) {
-            sb.append((i + 1)).append(". ").append(funcionarios.get(i)).append("\n");
+        for (int i = 0; i < funcionariosBanco.size(); i++) {
+            sb.append((i + 1)).append(". ").append(funcionariosBanco.get(i)).append("\n");
         }
         JOptionPane.showMessageDialog(null, sb.toString(), "Lista de Funcionários", JOptionPane.INFORMATION_MESSAGE);
     }
 
     static void listarVeiculos() {
-        if (veiculos.isEmpty()) {
+
+        ArrayList<Veiculo> listaVeiculos = veiculoDao.buscarTodos();
+
+        if (listaVeiculos.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhum veículo cadastrado ainda.",
                     "Lista de Veículos", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        StringBuilder sb = new StringBuilder(" VEÍCULOS CADASTRADOS (" + veiculos.size() + ")\n");
+        StringBuilder sb = new StringBuilder(" VEÍCULOS CADASTRADOS (" + listaVeiculos.size() + ")\n");
         sb.append("─".repeat(60)).append("\n");
-        for (int i = 0; i < veiculos.size(); i++) {
-            sb.append((i + 1)).append(". ").append(veiculos.get(i)).append("\n");
+        for (int i = 0; i < listaVeiculos.size(); i++) {
+            sb.append((i + 1)).append(". ").append(listaVeiculos.get(i)).append("\n");
         }
         JOptionPane.showMessageDialog(null, sb.toString(), "Lista de Veículos", JOptionPane.INFORMATION_MESSAGE);
     }
