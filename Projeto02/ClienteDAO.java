@@ -36,11 +36,12 @@ public class ClienteDAO {
                 ResultSet rs = stmt.executeQuery()
         ) {
             while (rs.next()) {
+                int id = rs.getInt("id");
                 String nome = rs.getString("nome");
                 String cpf = rs.getString("cpf");
                 String endereco = rs.getString("endereco");
 
-                Cliente cliente = new Cliente(nome, cpf, endereco);
+                Cliente cliente = new Cliente(id, nome, cpf, endereco);
 
                 clientesBanco.add(cliente);
             }
@@ -50,6 +51,31 @@ public class ClienteDAO {
         }
 
         return clientesBanco;
+    }
+
+    public Cliente buscarPorId(int id) {
+        String sql = "SELECT * FROM cliente WHERE id = ?";
+
+        try (
+                Connection conn = Conexao.conectar();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            stmt.setInt(1, id); // Passa o ID para o SQL
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) { // Usa 'if' em vez de 'while' porque só esperamos um resultado
+                    String nome = rs.getString("nome");
+                    String cpf = rs.getString("cpf");
+                    String endereco = rs.getString("endereco");
+
+                    return new Cliente(id, nome, cpf, endereco);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar cliente por ID: " + e.getMessage());
+        }
+
+        return null;
     }
 }
 

@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 public class Aluguel {
 
+    private int id;
     private Veiculo veiculo;
     private Cliente cliente;
     private Funcionario funcionario;
@@ -34,6 +35,19 @@ public class Aluguel {
         veiculo.setStatus(Veiculo.Status.ALUGADO);
     }
 
+    public Aluguel(int id, Veiculo veiculo, Cliente cliente, Funcionario funcionario,
+                   int dias, double valorTotal, LocalDate dataInicio, LocalDate dataFim, boolean ativo) {
+        this.id = id;
+        this.veiculo = veiculo;
+        this.cliente = cliente;
+        this.funcionario = funcionario;
+        this.dias = dias;
+        this.valorTotal = valorTotal;
+        this.dataInicio = dataInicio;
+        this.dataFim = dataFim;
+        this.ativo = ativo;
+    }
+
     public void encerrarLocacao() {
         if (!ativo) {
             throw new IllegalStateException("Esta locação já foi encerrada anteriormente.");
@@ -43,6 +57,8 @@ public class Aluguel {
         veiculo.setStatus(Veiculo.Status.DISPONIVEL);
     }
 
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
     public Veiculo getVeiculo() { return veiculo; }
     public Cliente getCliente() { return cliente; }
     public Funcionario getFuncionario() { return funcionario; }

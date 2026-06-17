@@ -14,6 +14,13 @@ public class Funcionario extends Pessoa {
         this.salario = salario;
     }
 
+    public Funcionario(int id, String nome, String cpf, String matricula, String cargo, double salario) throws ParseException {
+        super(id, nome, cpf);
+        this.matricula = matricula;
+        this.cargo = cargo;
+        this.salario = salario;
+    }
+
     public String getMatricula() { return matricula; }
     public void setMatricula(String matricula) { this.matricula = matricula; }
 

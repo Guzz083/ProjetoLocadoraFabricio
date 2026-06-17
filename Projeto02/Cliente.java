@@ -11,6 +11,12 @@ public class Cliente extends Pessoa {
         this.endereco = endereco;
     }
 
+    public Cliente(int id, String nome, String cpf, String endereco) throws ParseException {
+        super(id, nome, cpf);
+
+        this.endereco = endereco;
+    }
+
     public String getEnde() { return endereco; }
     public void setEnde(String nome) { this.endereco = endereco; }
 

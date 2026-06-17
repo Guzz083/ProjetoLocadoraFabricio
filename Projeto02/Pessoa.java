@@ -4,16 +4,22 @@ import javax.swing.text.MaskFormatter;
 import java.text.ParseException;
 
 public abstract class Pessoa {
+    private int id;
     private String nome;
     private String cpf;
 
-    public Pessoa(String nome, String cpf) throws ParseException {
+    public Pessoa(String nome, String cpf) {
+        this.nome = nome;
+        this.cpf = cpf;
+    }
+
+    public Pessoa(int id, String nome, String cpf) throws ParseException {
+        this.id = id;
         this.nome = nome;
         this.cpf = formatarCpf(cpf);
     }
 
     private String formatarCpf(String cpf) throws ParseException {
-        // Remove tudo que não for dígito antes de aplicar a máscara
         String apenasDigitos = cpf.replaceAll("[^0-9]", "");
 
         MaskFormatter formatter = new MaskFormatter("###.###.###-##");
@@ -21,6 +27,9 @@ public abstract class Pessoa {
 
         return formatter.valueToString(apenasDigitos);
     }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }

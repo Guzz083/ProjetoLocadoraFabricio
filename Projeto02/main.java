@@ -249,7 +249,10 @@ public class    main {
 
         try {
             Aluguel aluguel = new Aluguel(veiculoEscolhido, clienteEscolhido, funcionarioEscolhido, dias);
-            AluguelDAO.inserir(aluguel);
+
+            aluguelDAO.inserir(aluguel);
+
+            veiculoDao.atualizarStatus(veiculoEscolhido.getId(), Veiculo.Status.ALUGADO);
 
             JOptionPane.showMessageDialog(null,
                     "✅ Locação realizada com sucesso!\n\n" + aluguel,
@@ -261,11 +264,8 @@ public class    main {
     }
 
     static void encerrarLocacao() {
-        // Apenas locações ainda ativas podem ser encerradas
-        ArrayList<Aluguel> ativas = new ArrayList<>();
-        for (Aluguel a : alugueis) {
-            if (a.isAtivo()) ativas.add(a);
-        }
+
+        ArrayList<Aluguel> ativas = aluguelDAO.buscarAtivas();
 
         if (ativas.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Não há locações ativas no momento.",
@@ -276,9 +276,16 @@ public class    main {
         Aluguel aluguelEscolhido = (Aluguel) JOptionPane.showInputDialog(
                 null, "Selecione a locação a ser encerrada:", "Encerrar Locação",
                 JOptionPane.PLAIN_MESSAGE, null, ativas.toArray(), ativas.get(0));
-        if (aluguelEscolhido == null) { avisoVazio(); return; }
+        if (aluguelEscolhido == null) {
+            avisoVazio();
+            return;
+        }
 
         aluguelEscolhido.encerrarLocacao();
+
+        aluguelDAO.encerrar(aluguelEscolhido);
+
+        veiculoDao.atualizarStatus(aluguelEscolhido.getVeiculo().getId(), Veiculo.Status.DISPONIVEL);
 
         JOptionPane.showMessageDialog(null,
                 "✅ Locação encerrada com sucesso! O veículo está disponível novamente.\n\n" + aluguelEscolhido,
@@ -286,15 +293,18 @@ public class    main {
     }
 
     static void listarLocacoes() {
-        if (alugueis.isEmpty()) {
+
+        ArrayList<Aluguel> locacoesBanco = aluguelDAO.buscarTodos(); // Busca do banco
+
+        if (locacoesBanco.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Nenhuma locação registrada ainda.",
                     "Lista de Locações", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-        StringBuilder sb = new StringBuilder(" LOCAÇÕES REGISTRADAS (" + alugueis.size() + ")\n");
+        StringBuilder sb = new StringBuilder(" LOCAÇÕES REGISTRADAS (" + locacoesBanco.size() + ")\n");
         sb.append("─".repeat(60)).append("\n");
-        for (int i = 0; i < alugueis.size(); i++) {
-            sb.append((i + 1)).append(". ").append(alugueis.get(i)).append("\n");
+        for (int i = 0; i < locacoesBanco.size(); i++) {
+            sb.append((i + 1)).append(". ").append(locacoesBanco.get(i)).append("\n");
         }
         JOptionPane.showMessageDialog(null, sb.toString(), "Lista de Locações", JOptionPane.INFORMATION_MESSAGE);
     }

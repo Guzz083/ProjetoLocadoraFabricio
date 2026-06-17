@@ -5,6 +5,7 @@ public class Veiculo {
     public enum Tipo { CARRO, MOTO, VAN }
     public enum Status { DISPONIVEL, ALUGADO, MANUTENCAO }
 
+    private int id;
     private String placa;
     private String marca;
     private String modelo;
@@ -23,6 +24,21 @@ public class Veiculo {
         this.tipo = tipo;
         this.status = Status.DISPONIVEL;
     }
+
+    public Veiculo(int id, String placa, String marca, String modelo,
+                   int ano, double diaria, Tipo tipo, Status status) {
+        this.id = id;
+        this.placa = placa;
+        this.marca = marca;
+        this.modelo = modelo;
+        this.ano = ano;
+        this.diaria = diaria;
+        this.tipo = tipo;
+        this.status = status;
+    }
+
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getPlaca() { return placa; }
     public void setPlaca(String placa) { this.placa = placa; }
