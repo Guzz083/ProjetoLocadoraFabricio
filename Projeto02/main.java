@@ -10,7 +10,7 @@ public class    main {
     static ClienteDAO clienteDao = new ClienteDAO();
     static FuncionarioDAO funcionarioDao = new FuncionarioDAO();
     static VeiculoDAO veiculoDao = new VeiculoDAO();
-    static ArrayList<Aluguel> alugueis = new ArrayList<>();
+    static AluguelDAO aluguelDAO = new AluguelDAO();
 
     public static void main(String[] args) throws ParseException {
         while (true) {
@@ -249,7 +249,7 @@ public class    main {
 
         try {
             Aluguel aluguel = new Aluguel(veiculoEscolhido, clienteEscolhido, funcionarioEscolhido, dias);
-            alugueis.add(aluguel);
+            AluguelDAO.inserir(aluguel);
 
             JOptionPane.showMessageDialog(null,
                     "✅ Locação realizada com sucesso!\n\n" + aluguel,
