@@ -60,10 +60,10 @@ public class ClienteDAO {
                 Connection conn = Conexao.conectar();
                 PreparedStatement stmt = conn.prepareStatement(sql)
         ) {
-            stmt.setInt(1, id); // Passa o ID para o SQL
+            stmt.setInt(1, id);
 
             try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) { // Usa 'if' em vez de 'while' porque só esperamos um resultado
+                if (rs.next()) {
                     String nome = rs.getString("nome");
                     String cpf = rs.getString("cpf");
                     String endereco = rs.getString("endereco");

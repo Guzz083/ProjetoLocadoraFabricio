@@ -8,12 +8,11 @@ import java.util.ArrayList;
 
 public class AluguelDAO {
     public void inserir(Aluguel aluguel) {
-        // 1. A string SQL corrigida com as colunas novas (com _id)
         String sql = "INSERT INTO aluguel (veiculo_id, cliente_id, funcionario_id, dias, valor_total, data_inicio, data_fim, ativo) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (
                 Connection conn = Conexao.conectar();
-                PreparedStatement stmt = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS); // Retorna o ID gerado do aluguel
+                PreparedStatement stmt = conn.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS);
         ) {
 
             stmt.setInt(1, aluguel.getVeiculo().getId());
